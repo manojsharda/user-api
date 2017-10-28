@@ -137,6 +137,47 @@ describe('POST /users/login', () => {
   });
 });
 
+describe('PATCH /users/:id', () => {
+  it('should update the user', (done) => {
+    var hexId = users[1]._id.toHexString();
+    var firstName= 'userTwoFirstName1';
+    var lastName='userTwoLastName1';
+    var dateOfBirth='1986-12-12T00:00:00.000Z';
+    request(app)
+      .patch(`/users/${hexId}`)
+      .set('x-auth', users[1].tokens[0].token)
+      .send({
+        firstName: 'userTwoFirstName1',
+        lastName: 'userTwoLastName1',
+        dateOfBirth:'1986-12-12T00:00:00.000Z'        
+      })
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.user.firstName).toBe(firstName);
+        expect(res.body.user.lastName).toBe(lastName);
+        expect(res.body.user.dateOfBirth).toBe(dateOfBirth);
+      })
+      .end(done);
+  });
+
+  it('should not update the other user details', (done) => {
+    var hexId = users[0]._id.toHexString();
+    var firstName= 'userTwoFirstName1';
+    var lastName='userTwoLastName1';
+    var dateOfBirth='1986-12-12T00:00:00.000Z';
+    request(app)
+      .patch(`/users/${hexId}`)
+      .set('x-auth', users[1].tokens[0].token)
+      .send({
+        firstName: 'userTwoFirstName',
+        lastName: 'userTwoLastName',
+        dateOfBirth:'1986-12-12' 
+      })
+      .expect(404)
+      .end(done);
+  });
+});
+
 describe('DELETE /users/me/token', () => {
   it('should remove auth token on logout', (done) => {
     request(app)
